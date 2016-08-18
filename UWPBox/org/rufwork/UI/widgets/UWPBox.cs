@@ -804,8 +804,7 @@ namespace org.rufwork.UI.widgets
 
             if (result.Equals(0))
             {
-                this.Text = @"
-###Call me Ishmael.
+                this.Text = @"###Call me Ishmael.
 
 <img alt=""Jumping Ahead"" src=""https://upload.wikimedia.org/wikipedia/commons/7/7b/Moby_Dick_p510_illustration.jpg"" style=""display:block;margin:0 auto;max-width:150px;"" />
 
