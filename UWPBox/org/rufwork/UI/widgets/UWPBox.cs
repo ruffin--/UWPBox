@@ -22,9 +22,9 @@ using Windows.UI.Popups;
 namespace org.rufwork.UI.widgets
 {
     //=========================================================================
-    #region Duped Extensions
+    #region Duped Extensions & Convenience Methods
     //=========================================================================
-    // I have all of these in RufworkExtensions (https://github.com/ruffin--/RufworkExtensions),
+    // I have most of these in RufworkExtensions (https://github.com/ruffin--/RufworkExtensions),
     // but I'm going to embed here (with stodgily appended underscores to method names) to make
     // things easier to reuse.
     public static class UWPBoxExtensions
@@ -98,9 +98,25 @@ namespace org.rufwork.UI.widgets
         {
             System.Diagnostics.Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ": " + strMsg);
         }
+
+        public static async Task<int> ShowDialog(string strMsg, string strTitle = "", bool bShowCancel = true)
+        {
+            var dialog = new MessageDialog(strMsg);
+            if (!string.IsNullOrWhiteSpace(strTitle))
+            {
+                dialog.Title = strTitle;
+            }
+
+            dialog.Commands.Add(new UICommand { Label = "Ok", Id = 0 });
+            if (bShowCancel)
+                dialog.Commands.Add(new UICommand { Label = "Cancel", Id = 1 });
+
+            var res = await dialog.ShowAsync();
+            return (int)res.Id;
+        }
     }
     //=========================================================================
-    #endregion Duped Extensions
+    #endregion Duped Extensions & Convenience Methods
     //=========================================================================
 
 
@@ -782,33 +798,49 @@ namespace org.rufwork.UI.widgets
 * test 3";
         }
 
-        public void MobyWrapped()
+        public async void MobyWrapped()
         {
-            this.Text = @"Call me Ishmael. **Some years ago--*never mind how long precisely*--having little
-or no money in my purse**, and nothing particular to interest me on shore, I
-thought I would sail about a little and see the watery part of the world. It is
-a way I have of driving off
+            int result = await UWPBoxExtensions.ShowDialog("Erase what's in this window and replace with testing Markdown? Really?", "Pick Cancel");
 
-    the spleen and regulating the circulation. Whenever
-    I find myself growing grim about the mouth; whenever it is a damp, drizzly
-    November in my soul; whenever I find myself involuntarily pausing before coffin
-    warehouses, and bringing up the rear of
+            if (result.Equals(0))
+            {
+                this.Text = @"
+###Call me Ishmael.
 
-every funeral I meet; and especially
-whenever my hypos get such an upper hand of me, that it requires a strong moral
-principle to prevent me from deliberately stepping into the street, and
+<img alt=""Jumping Ahead"" src=""https://upload.wikimedia.org/wikipedia/commons/7/7b/Moby_Dick_p510_illustration.jpg"" style=""display:block;margin:0 auto;max-width:150px;"" />
+
+**Some years ago--*never mind how long precisely*--having little or no money in my purse**, and nothing particular to interest me on shore, I thought I would `sail` about a little and see the watery part of the world. It is a way I have of driving off
+
+    the spleen and regulating the circulation.
+    Whenever I find myself growing grim about the
+    mouth; whenever it is a damp, drizzly November in
+
+> my soul; whenever I find myself involuntarily pausing
+> before coffin warehouses, and bringing up the rear of
+> every funeral I meet;
+
+<style>table { margin: 0 auto; }</style>
+
+|First| Second     |Third     |Fourth|
+|-----|:----------:|----------|-----:|
+|and  | especially |whenever  |my    |
+hypos | get        |such      |an    |
+|upper| hand       |of        |me,
+that  | it         |requires  | a
+
+strong moral principle to prevent me from deliberately stepping into the street, and
 
 [Linkige](http://www.rufwork.com)
 
 methodically knocking people's hats off--then, I account it high time to get to
 
-> sea as soon as I can. This is my substitute for pistol and ball. With a
-> philosophical flourish Cato throws himself upon his sword; I quietly take to
-> the ship.
+> sea as soon as I can. This is my substitute for
+> pistol and ball. With a philosophical flourish
+> Cato throws himself upon his sword; I quietly
+> take to the ship.
 
- There is nothing surprising in this. If they but knew it, almost all
-men in their degree, some time or other, cherish very nearly the same feelings
-towards the ocean with me.";
+There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the ocean with me.";
+            }
         }
         //=========================================
         #endregion debug methods
