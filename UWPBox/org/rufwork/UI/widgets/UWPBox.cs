@@ -479,7 +479,6 @@ namespace org.rufwork.UI.widgets
                         this.HandleTabPress(isCtrlDown, isShiftDown, isAltDown);
                         e.Handled = true;
                         break;
-
                 }
 
                 this.HandleKeyDown(sender, e, isCtrlDown, isShiftDown, isAltDown);
@@ -806,7 +805,7 @@ namespace org.rufwork.UI.widgets
             {
                 this.Text = @"###Call me Ishmael.
 
-<img alt=""Jumping Ahead"" src=""https://upload.wikimedia.org/wikipedia/commons/7/7b/Moby_Dick_p510_illustration.jpg"" style=""display:block;margin:0 auto;max-width:150px;"" />
+[Jumping Ahead](https://upload.wikimedia.org/wikipedia/commons/7/7b/Moby_Dick_p510_illustration.jpg)
 
 **Some years ago--*never mind how long precisely*--having little or no money in my purse**, and nothing particular to interest me on shore, I thought I would `sail` about a little and see the watery part of the world. It is a way I have of driving off
 
