@@ -18,6 +18,7 @@ using Windows.UI.Xaml.Media;
 using System.Text.RegularExpressions;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.UI.Popups;
+using org.rufwork.ViewModels;
 
 namespace org.rufwork.UI.widgets
 {
@@ -331,15 +332,22 @@ namespace org.rufwork.UI.widgets
             return (int)res.Id;
         }
 
-        public string GetCurrentLine(int intNumLinesPreviousToCurrent, string strContents, int intSelectionPoint)
+        public CurrentLineViewModel GetCurrentLine(int intNumLinesPreviousToCurrent = 0, string strContents = null)
         {
-            string ret = string.Empty;
+            return this.GetCurrentLine(intNumLinesPreviousToCurrent, strContents ?? this.Text, this.SelectionStart2_ForText);
+        }
+
+        public CurrentLineViewModel GetCurrentLine(int intNumLinesPreviousToCurrent, string strContents, int intSelectionPoint)
+        {
+            CurrentLineViewModel vm = new CurrentLineViewModel();
+
             bool noValueExists = false;
             string lineLead = string.Empty;
             string lineEnd = string.Empty;
 
             string strLeading = strContents.Substring(0, intSelectionPoint).NormalizeNewlineToCarriageReturn_();
 
+            // Note: Loop is only executed if we're going back one or more lines from the current.
             for (int i = 0; i < intNumLinesPreviousToCurrent; i++)
             {
                 if (strLeading.Contains('\r'))
@@ -352,7 +360,6 @@ namespace org.rufwork.UI.widgets
                 }
                 else
                 {
-                    ret = string.Empty;
                     noValueExists = true;
                     break;
                 }
@@ -384,15 +391,25 @@ namespace org.rufwork.UI.widgets
                     {
                         lineEnd = strTrailing;
                     }
-                    ret = lineLead + lineEnd;
+                    vm.leading = lineLead;
+                    vm.trailing = lineEnd;
                 }
                 else
                 {
-                    ret = lineLead;
+                    vm.leading = lineLead;
+                    vm.trailing = string.Empty;
                 }
             }
 
-            return ret;
+            return vm;
+        }
+
+        public void SelectCurrentLine()
+        {
+            CurrentLineViewModel vm = this.GetCurrentLine();
+
+            this.SelectionStart -= vm.leading.Length;
+            this.SelectionLength = vm.fullLineWithoutEnding.Length;
         }
         //=============================================
         #endregion methods that could live anywhere
@@ -708,18 +725,6 @@ namespace org.rufwork.UI.widgets
         //====================================================
         #endregion KeyUp related
         //====================================================
-
-        #region getCurrentLine convenience
-        public string GetCurrentLine(bool iLiedGetPreviousLine)
-        {
-            return this.GetCurrentLine(1);
-        }
-
-        public string GetCurrentLine(int intNumLinesPreviousToCurrent = 0, string strContents = null)
-        {
-            return this.GetCurrentLine(intNumLinesPreviousToCurrent, strContents ?? this.Text, this.SelectionStart2_ForText);
-        }
-        #endregion getCurrentLine convenience
 
         //=========================================
         #region textbox text manipulation methods

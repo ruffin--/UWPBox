@@ -108,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="org\rufwork\UI\widgets\UWPBox.cs" />
+    <Compile Include="org\rufwork\ViewModels\CurrentLineViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\UWPBox.rd.xml" />
   </ItemGroup>

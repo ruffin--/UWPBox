@@ -5,6 +5,15 @@ This project hopes to work around some of the nasty issues with the early releas
 
 > **NOTE:** Let me emphasize that first one. Even if `Environment.NewLine` is `\r\n`, and you have `\r\n` all over `myTextBox.Text`, if you check `myTextBox.SelectedText`, at least in Windows 10 for PCs, *all newlines will be turned into `\r`!!!* This makes for really wacky integrations of changes to `SelectedText` back into the context of `Text`. See [the StackOverflow question](http://stackoverflow.com/questions/35138047/textbox-text-substringtextbox-selectionstart-doesnt-work-because-selectedtext) for a specific example.
 
+This has been reported as a [bug in the .NET Framework](https://connect.microsoft.com/VisualStudio/feedback/details/2967753), but unfortunately got pushed to the Windows Platform team instead of a workaround given for .NET specifically:
+
+> Posted by Paul [MSFT] on 8/16/2016 at 8:56 AM
+> Hi,
+> 
+> We have determined that this issue belongs to the Windows Platform team and we have transferred this issue to their database. Per their request, we will close this issue and they will contact you directly if they need further information.
+> 
+> To submit feedback directly on Windows, use the Windows Feedback app. For more information, see http://windows.microsoft.com/en-us/windows/preview-updates-feedback-pc.
+
 The only important file from this repository for your usage is going to be `UWPBox.cs`, which can be found in the folder tree `UWPBox\org\rufwork\UI\widgets`. You are welcome, of course, to take that out of its dated Java-style folder tree.
 
 Behaviors that this extension of TextBox changes include:
