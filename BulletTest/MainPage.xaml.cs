@@ -74,9 +74,15 @@ nearly the same feelings towards the ocean with me.";
 
         }
 
-        private void CmdGo_Click(object sender, RoutedEventArgs e)
+        private async void CmdGo_Click(object sender, RoutedEventArgs e)
         {
-            this.txt.FindNext(" I ");
+            bool found = await this.txt.FindNext(" I ");
+
+            if (found)
+            {
+                this.txt.SelectedText = " YOU ";
+            }
+
             this.txt.Focus(FocusState.Programmatic);
         }
     }

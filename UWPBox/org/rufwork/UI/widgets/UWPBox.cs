@@ -487,14 +487,16 @@ namespace org.rufwork.UI.widgets
             e.Handled = true;
         }
 
-        public async void FindNext(string toFind)
+        public async Task<bool> FindNext(string toFind)
         {
-            int found = this.Text.IndexOf(toFind, this.SelectionStart2_ForText + this.SelectionLength);
+            int foundLoc = this.Text.IndexOf(toFind, this.SelectionStart2_ForText + this.SelectedText.Trim().Length);
+            bool found = false;
 
-            if (found >= 0)
+            if (foundLoc >= 0)
             {
-                this.SelectionStart = this.TextIndexToTextBoxLoc(found);
+                this.SelectionStart = this.TextIndexToTextBoxLoc(foundLoc);
                 this.SelectionLength = toFind.Length;
+                found = true;
             }
             else
             {
@@ -503,9 +505,12 @@ namespace org.rufwork.UI.widgets
 Wrap to the beginning and continue?", toFind), "Text not found"))
                 {
                     this.SelectionStart = 0;
-                    this.FindNext(toFind);
+                    this.SelectionLength = 0;
+                    found = await this.FindNext(toFind);
                 }
             }
+
+            return found;
         }
 
         //====================================================
