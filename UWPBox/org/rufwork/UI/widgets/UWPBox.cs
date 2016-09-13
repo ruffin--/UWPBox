@@ -269,6 +269,35 @@ namespace org.rufwork.UI.widgets
             }
         }
 
+        public int TextIndexToTextBoxLoc(int textIndex)
+        {
+            int ret = textIndex;
+
+            switch (Environment.NewLine)
+            {
+                case "\r\n":
+                    if (KludgeItUp)
+                    {
+                        string strWorking = this.Text.Substring(0, textIndex);
+                        int intNLcount = Regex.Matches(strWorking, "\r\n").Count;
+                        ret = textIndex - intNLcount;
+                    }
+                    break;
+
+                case "\r":
+                case "\n":
+                    // We should be fine, right? One for one.
+                    break;
+
+                default:
+                    throw new Exception("Newline value not captured in UWPBox[3]: ("
+                        + Environment.NewLine.Length + ") "
+                        + Environment.NewLine.Replace('\n', 'N').Replace('\r', 'R'));
+            }
+
+            return ret;
+        }
+
         /// <summary>
         /// A SelectionLength that meshes with the plain Text property.
         /// </summary>
@@ -456,6 +485,27 @@ namespace org.rufwork.UI.widgets
             //bool isShiftDown = Window.Current.CoreWindow.GetKeyState(VirtualKey.Shift).HasFlag(CoreVirtualKeyStates.Down);
 
             e.Handled = true;
+        }
+
+        public async void FindNext(string toFind)
+        {
+            int found = this.Text.IndexOf(toFind, this.SelectionStart2_ForText + this.SelectionLength);
+
+            if (found >= 0)
+            {
+                this.SelectionStart = this.TextIndexToTextBoxLoc(found);
+                this.SelectionLength = toFind.Length;
+            }
+            else
+            {
+                if (0 == await UWPBoxExtensions.ShowDialog(string.Format(@"No instances of ""{0}"" were found in this text starting at your selection point.
+
+Wrap to the beginning and continue?", toFind), "Text not found"))
+                {
+                    this.SelectionStart = 0;
+                    this.FindNext(toFind);
+                }
+            }
         }
 
         //====================================================

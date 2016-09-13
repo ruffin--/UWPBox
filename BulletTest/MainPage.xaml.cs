@@ -76,17 +76,8 @@ nearly the same feelings towards the ocean with me.";
 
         private void CmdGo_Click(object sender, RoutedEventArgs e)
         {
-            //this.txt.Focus(FocusState.Programmatic);
-            //this.txt.SelectionStart = 1;
-            //this.txt.SelectionLength = 8;
-
-            CurrentLineViewModel line = this.txt.GetCurrentLine();
-
-            System.Diagnostics.Debug.WriteLine(string.Format(@"#{0}#
-#{1}#", line.leading, line.trailing));
-
+            this.txt.FindNext(" I ");
             this.txt.Focus(FocusState.Programmatic);
-            this.txt.SelectCurrentLine();
         }
     }
 }
