@@ -74,15 +74,34 @@ nearly the same feelings towards the ocean with me.";
 
         }
 
-        private async void CmdGo_Click(object sender, RoutedEventArgs e)
+        private void CmdGo_Click(object sender, RoutedEventArgs e)
         {
-            bool found = await this.txt.FindNext(" I ");
+            //bool found = await this.txt.FindNext(" I ");
 
-            if (found)
-            {
-                this.txt.SelectedText = " YOU ";
-            }
+            //if (found)
+            //{
+            //    this.txt.SelectedText = " YOU ";
+            //}
 
+            //            int previousSelectedLength = txt.SelectionLength;
+            //            int maxSelection = txt.Text.Length - txt.SelectionStart2_ForText;
+            //            do
+            //            {
+            //                txt.SelectionLength++;
+            //                System.Diagnostics.Debug.WriteLine(string.Format(@"Old selection length is
+            //{0} and is now
+            //{1} after adding one.", previousSelectedLength, txt.SelectionLength));
+            //                if (!previousSelectedLength.Equals(txt.SelectionLength))
+            //                {
+            //                    previousSelectedLength++;
+            //                }
+            //            } while (txt.SelectionLength < maxSelection - 1);
+
+
+
+            //txt.CountNewlinesFollowingSelection().ToString().LogMsg();
+
+            txt.ExpandSelectionToNextNL().ToString().LogMsg();
             this.txt.Focus(FocusState.Programmatic);
         }
     }

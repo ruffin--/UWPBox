@@ -95,7 +95,7 @@ namespace org.rufwork.UI.widgets
             return ret;
         }
 
-        public static void LogMsg(string strMsg)
+        public static void LogMsg(this string strMsg)
         {
             System.Diagnostics.Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ": " + strMsg);
         }
@@ -355,7 +355,7 @@ namespace org.rufwork.UI.widgets
 
             if ((int)res.Id == 0)
             {
-                UWPBoxExtensions.LogMsg("Selected id: " + res.Id);
+                ("Selected id: " + res.Id).LogMsg();
             }
 
             return (int)res.Id;
@@ -440,6 +440,46 @@ namespace org.rufwork.UI.widgets
             this.SelectionStart -= vm.leading.Length;
             this.SelectionLength = vm.fullLineWithoutEnding.Length;
         }
+
+        public int CountNewlinesPreceedingSelection()
+        {
+            string leading = this.Text.Substring(0, this.SelectionStart2_ForText);
+            string preceeding0A0Ds = string.Concat(leading.Reverse().TakeWhile(c => ac0D0A.Contains(c)).Reverse());
+            return preceeding0A0Ds.NormalizeNewlineToCarriageReturn_().Length;
+        }
+
+        // This seems slow for some reason. Sure would be great if MS
+        // would fix TextBox.
+        public int CountNewlinesFollowingSelection()
+        {
+            int originalSelectionLength = this.SelectionLength;
+
+            string trailing0D0As = string.Empty;
+            bool bContinue = true;
+
+            while (bContinue)
+            {
+                this.SelectionLength++;
+                int selectedTextLength = this.SelectedText.Length;
+                string cachedSelection = this.SelectedText;
+                char c = cachedSelection[cachedSelection.Length - 1];
+
+                if (this.SelectionLength.Equals(cachedSelection.Length)
+                    && ac0D0A.Contains(c))
+                {
+                    trailing0D0As += c;
+                }
+                else
+                {
+                    bContinue = false;
+                }
+            }
+
+            trailing0D0As = trailing0D0As.NormalizeNewlineToCarriageReturn_();
+            this.SelectionLength = originalSelectionLength;
+
+            return trailing0D0As.Length;
+        }
         //=============================================
         #endregion methods that could live anywhere
         //=============================================
@@ -478,7 +518,7 @@ namespace org.rufwork.UI.widgets
 
         private void UWPBox_Paste(object sender, TextControlPasteEventArgs e)
         {
-            UWPBoxExtensions.LogMsg("Native paste action ignored and transferred to KeyUp");
+            "Native paste action ignored and transferred to KeyUp".LogMsg();
 
             // This isn't accessible from here, so we're going to have to rip out all pastes,
             // and then reimplement in KeyUp for V.
@@ -528,7 +568,7 @@ Wrap to the beginning and continue?", toFind), "Text not found"))
                 switch (e.OriginalKey)
                 {
                     case VirtualKey.Enter:
-                        UWPBoxExtensions.LogMsg("Enter from main keydownhandler");
+                        "Enter from main keydownhandler".LogMsg();
                         break;
 
                     case VirtualKey.I:
@@ -572,7 +612,7 @@ Wrap to the beginning and continue?", toFind), "Text not found"))
             {
                 if (isCtrlDown && e.OriginalKey != VirtualKey.Control)
                 {
-                    UWPBoxExtensions.LogMsg("KeyDown from UWPBox BaseHandleKeys: " + e.OriginalKey.ToString());
+                    ("KeyDown from UWPBox BaseHandleKeys: " + e.OriginalKey.ToString()).LogMsg();
                 }
 
                 switch (e.OriginalKey)
@@ -612,7 +652,7 @@ Wrap to the beginning and continue?", toFind), "Text not found"))
 
         public virtual void HandleCtrlI()
         {
-            UWPBoxExtensions.LogMsg("Ctrl-I pressed.");
+            "Ctrl-I pressed.".LogMsg();
         }
 
         public string DeleteATabWorthOfLeadingSpaces(string value)
@@ -724,7 +764,7 @@ Wrap to the beginning and continue?", toFind), "Text not found"))
                 {
                     intStringOffset++;
                     c = strCurrentText[intSelStart - intStringOffset];
-                    UWPBoxExtensions.LogMsg("Char offset " + intStringOffset + ": " + (int)c + " :: " + c.ToString());
+                    ("Char offset " + intStringOffset + ": " + (int)c + " :: " + c.ToString()).LogMsg();
                     if (!ac0D0A.Contains(c))
                     {
                         strExtra = c + strExtra;
@@ -743,6 +783,19 @@ Wrap to the beginning and continue?", toFind), "Text not found"))
 
 
             return intStringOffset;
+        }
+
+        public int ExpandSelectionToNextNL()
+        {
+            int trailingLength = 0;
+            if (!(this.SelectionLength > 0 && ac0D0A.Contains(this.SelectedText[this.SelectedText.Length - 1])))
+            {
+                string allTrailing = this.Text.Substring(this.SelectionLength2_ForText + this.SelectionStart2_ForText);
+                trailingLength = allTrailing.TakeWhile(c => !ac0D0A.Contains(c)).Count();
+
+                this.SelectionLength += trailingLength;
+            }
+            return trailingLength;
         }
         //====================================================
         #endregion KeyDown related
