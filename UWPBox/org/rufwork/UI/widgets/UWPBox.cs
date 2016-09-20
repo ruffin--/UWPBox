@@ -224,7 +224,7 @@ namespace org.rufwork.UI.widgets
                             int lastStop = this.SelectionStart;
                             int intNLcount = 0;
 
-                            while (strWorking.Contains("\r\n"))
+                            while (strWorking.Contains("\r\n") || strWorking.Equals("\r"))
                             {
                                 int nlCountFromLoop = Regex.Matches(strWorking, "\r\n").Count;
                                 intNLcount += nlCountFromLoop;
@@ -237,10 +237,9 @@ namespace org.rufwork.UI.widgets
                                 // check said that we are).
                                 if (
                                     strWorking.EndsWith("\r") && !strWorking.Contains("\r\n")
-                                    && this.Text.Length >= lastStop + nlCountFromLoop
-                                    && this.Text[lastStop + nlCountFromLoop - 1].Equals('\n')
-                                )
-                                {
+                                    && this.Text.Length > lastStop
+                                    && this.Text[lastStop].Equals('\n')
+                                )   {
                                     intNLcount++;
                                     // TODO: There has to be a better way to do this. The probablem is that if "\r\n" is the
                                     // end of the selection, we get stuck in a loop where we find one more "\r\n" match, then we
@@ -764,7 +763,9 @@ Wrap to the beginning and continue?", toFind), "Text not found"))
                 {
                     intStringOffset++;
                     c = strCurrentText[intSelStart - intStringOffset];
-                    ("Char offset " + intStringOffset + ": " + (int)c + " :: " + c.ToString()).LogMsg();
+
+                    //("Char offset " + intStringOffset + ": " + (int)c + " :: " + c.ToString()).LogMsg();
+
                     if (!ac0D0A.Contains(c))
                     {
                         strExtra = c + strExtra;
