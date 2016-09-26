@@ -526,9 +526,9 @@ namespace org.rufwork.UI.widgets
             e.Handled = true;
         }
 
-        public async Task<bool> FindNext(string toFind)
+        public async Task<bool> FindNext(string toFind, StringComparison comparisonType = StringComparison.CurrentCultureIgnoreCase)
         {
-            int foundLoc = this.Text.IndexOf(toFind, this.SelectionStart2_ForText + this.SelectedText.Trim().Length);
+            int foundLoc = this.Text.IndexOf(toFind, this.SelectionStart2_ForText + this.SelectedText.Trim().Length, comparisonType);
             bool found = false;
 
             if (foundLoc >= 0)
