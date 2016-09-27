@@ -526,7 +526,7 @@ namespace org.rufwork.UI.widgets
             e.Handled = true;
         }
 
-        public async Task<bool> FindNext(string toFind, StringComparison comparisonType = StringComparison.CurrentCultureIgnoreCase)
+        public async Task<bool> FindNext(string toFind, StringComparison comparisonType)
         {
             int foundLoc = this.Text.IndexOf(toFind, this.SelectionStart2_ForText + this.SelectedText.Trim().Length, comparisonType);
             bool found = false;
@@ -545,7 +545,7 @@ Wrap to the beginning and continue?", toFind), "Text not found"))
                 {
                     this.SelectionStart = 0;
                     this.SelectionLength = 0;
-                    found = await this.FindNext(toFind);
+                    found = await this.FindNext(toFind, comparisonType);
                 }
             }
 
@@ -691,7 +691,7 @@ Wrap to the beginning and continue?", toFind), "Text not found"))
             }
             else
             {
-                int intStringOffset = this.ExpandSelectionToPrevNL();
+                int intLengthAdded = this.ExpandSelectionToPrevNL();
 
                 // Shift down means unindent a tab
                 if (isShiftDown)
@@ -717,15 +717,7 @@ Wrap to the beginning and continue?", toFind), "Text not found"))
                     // out *all* that we extended, our selected length would be too short by the number of
                     // chars we just took off the front when we "detabbed".
                     int intNumSpacesDeletedFromFirstLine = Math.Min(astrLines[0].PullLeadingAndTrailingSpaces_().Item1.Length, UWPBox.Tab.Length);
-
-                    // TODO: See above -- if we want to honor the cursor location, we need to do this *and*
-                    // get a custom _deleteATabWorthOfLeadingSpaces() action for the first line.
-                    // intNumSpacesDeletedFromFirstLine = Math.Min(intNumSpacesDeletedFromFirstLine, intStringOffset);
-
-                    //this.SelectionStart = this.SelectionStart > intNumSpacesDeletedFromFirstLine ?
-                    //    this.SelectionStart - intNumSpacesDeletedFromFirstLine : 0;
-                    //this.SelectionLength += intNumSpacesDeletedFromFirstLine;
-                    intStringOffset -= intNumSpacesDeletedFromFirstLine;
+                    intLengthAdded = Math.Max(intLengthAdded - intNumSpacesDeletedFromFirstLine, 0);
                 }
                 else
                 {
@@ -738,8 +730,8 @@ Wrap to the beginning and continue?", toFind), "Text not found"))
                     this.SelectionStart += Tab.Length;      // Ditto
                 }
 
-                this.SelectionLength -= intStringOffset;
-                this.SelectionStart += intStringOffset;
+                this.SelectionLength -= intLengthAdded;
+                this.SelectionStart += intLengthAdded;
             }
         }
 
