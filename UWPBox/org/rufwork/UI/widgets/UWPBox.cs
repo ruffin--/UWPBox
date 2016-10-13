@@ -115,6 +115,62 @@ namespace org.rufwork.UI.widgets
             var res = await dialog.ShowAsync();
             return (int)res.Id;
         }
+
+        /// <summary>
+        /// Will return a Microsoft formatted HTML snippet if the clipboard contains it.
+        /// Passing returnHtmlInFragmentFormat as true will return it in "raw" fragment format.
+        /// See: https://msdn.microsoft.com/en-us/library/windows/desktop/ms649015(v=vs.85).aspx
+        /// Passing returnHtmlInFragmentFormat as false, the default, will only return the html fragment
+        /// without any metadata or &lt;html&gt; tags.
+        ///
+        /// If clipboard isn't in HTML format, this will attempt to return the clipboard's contents as text.
+        /// </summary>
+        /// <param name="returnHtmlInFragmentFormat">If true, full Microsoft html fragment format will
+        /// be returned. False will return only the html fragment without metadata or html tags.</param>
+        /// <returns>Returns ONE of
+        /// 1.) Full html Microsoft fragment format as text,
+        /// 2.) The html fragment as text, or
+        /// 3.) Non-html format clipboard contents as text.</returns>
+        public static async Task<string> ClipboardAsHtml(bool returnHtmlInFragmentFormat = false)
+        {
+            string ret = string.Empty;
+            DataPackageView dataPackageView = Clipboard.GetContent();
+
+            if (dataPackageView.Contains(StandardDataFormats.Html))
+            {
+                ret = await Clipboard.GetContent().GetHtmlFormatAsync();
+
+                if (!returnHtmlInFragmentFormat)
+                {
+                    string delimiterStartAfter = "<!--StartFragment-->";
+                    string delimiterEndBefore = "<!--EndFragment-->";
+
+                    if (-1 < ret.IndexOf(delimiterStartAfter))
+                    {
+                        ret = ret.Substring(ret.IndexOf(delimiterStartAfter) + delimiterStartAfter.Length);
+                        if (-1 < ret.IndexOf(delimiterEndBefore))
+                        {
+                            ret = ret.Substring(0, ret.IndexOf(delimiterEndBefore));
+                        }
+                        else
+                        {
+                            ret = string.Empty;  // No luck, Ending not after Start; go back to nothing.
+                        }
+                    }
+                }
+            }
+            else if (dataPackageView.Contains(StandardDataFormats.Text))
+            {
+                ret = await Clipboard.GetContent().GetTextAsync();
+            }
+
+            return ret;
+        }
+
+        public static async Task<string> ClipboardAsText()
+        {
+            return await Clipboard.GetContent().GetTextAsync();
+        }
     }
     //=========================================================================
     #endregion Duped Extensions & Convenience Methods
@@ -581,7 +637,7 @@ Wrap to the beginning and continue?", toFind), "Text not found"))
 
                     // Reimplementing Paste
                     case VirtualKey.V:
-                        if (isCtrlDown)
+                        if (isCtrlDown || isAltDown)
                             this.HandlePaste(isCtrlDown, isShiftDown, isAltDown);
                         break;
 
@@ -636,7 +692,7 @@ Wrap to the beginning and continue?", toFind), "Text not found"))
             {
                 try
                 {
-                    string strClipboard = await Clipboard.GetContent().GetTextAsync();
+                    string strClipboard = await UWPBoxExtensions.ClipboardAsText();
                     this.SelectedText = strClipboard;   // TODO: Be more careful about things that don't have text.
 
                     this.SelectionStart += this.SelectionLength;
@@ -922,8 +978,6 @@ Wrap to the beginning and continue?", toFind), "Text not found"))
 > my soul; whenever I find myself involuntarily pausing
 > before coffin warehouses, and bringing up the rear of
 > every funeral I meet;
-
-<style>table { margin: 0 auto; }</style>
 
 |First| Second     |Third     |Fourth|
 |-----|:----------:|----------|-----:|
