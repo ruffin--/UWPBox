@@ -117,21 +117,31 @@ namespace org.rufwork.UI.widgets
         }
 
         /// <summary>
-        /// Will return a Microsoft formatted HTML snippet if the clipboard contains it.
-        /// Passing returnHtmlInFragmentFormat as true will return it in "raw" fragment format.
+        /// Will return a Microsoft formatted HTML snippet if the clipboard contains it, otherwise
+        /// plain text.
+        ///
+        /// Passing returnFragmentOnly as false, the default, will return "full" clipboard contents
+        /// in "raw" format:
         /// See: https://msdn.microsoft.com/en-us/library/windows/desktop/ms649015(v=vs.85).aspx
-        /// Passing returnHtmlInFragmentFormat as false, the default, will only return the html fragment
-        /// without any metadata or &lt;html&gt; tags.
+        ///
+        /// You may also want to see this convenience wrapper that parses html fragments into view models:
+        /// https://github.com/ruffin--/HtmlFragmentHelper
+        ///
+        /// Passing returnHtmlClipboardRaw as true will only return the HTML code from the selected fragment
+        /// without any clipboard metadata or HTML header information. See `returnFragmentOnly` comments
+        /// for more details.
         ///
         /// If clipboard isn't in HTML format, this will attempt to return the clipboard's contents as text.
         /// </summary>
-        /// <param name="returnHtmlInFragmentFormat">If true, full Microsoft html fragment format will
-        /// be returned. False will return only the html fragment without metadata or html tags.</param>
+        /// <param name="returnFragmentOnly">If false, the clipboard will be returned as a  full
+        /// Microsoft html fragment be returned. True will return only the html fragment between
+        /// "&lt;!--StartFragment-->" and &lt;!--EndFragment--> tags without metadata or any html
+        /// outside of those two tags.</param>
         /// <returns>Returns ONE of
-        /// 1.) Full html Microsoft fragment format as text,
-        /// 2.) The html fragment as text, or
-        /// 3.) Non-html format clipboard contents as text.</returns>
-        public static async Task<string> ClipboardAsHtml(bool returnHtmlInFragmentFormat = false)
+        /// 1.) Full html Microsoft clipboard as text,
+        /// 2.) The html fragment of the clipboard as text, or
+        /// 3.) Non-html format clipboard contents as plain text.</returns>
+        public static async Task<string> ClipboardAsHtml(bool returnFragmentOnly = false)
         {
             string ret = string.Empty;
             DataPackageView dataPackageView = Clipboard.GetContent();
@@ -140,7 +150,7 @@ namespace org.rufwork.UI.widgets
             {
                 ret = await Clipboard.GetContent().GetHtmlFormatAsync();
 
-                if (!returnHtmlInFragmentFormat)
+                if (returnFragmentOnly)
                 {
                     string delimiterStartAfter = "<!--StartFragment-->";
                     string delimiterEndBefore = "<!--EndFragment-->";
