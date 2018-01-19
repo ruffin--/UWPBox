@@ -192,6 +192,11 @@ namespace org.rufwork.UI.widgets
         public static string Tab = "    ";
         public static char[] ac0D0A = { '\r', '\n' };
 
+
+        // Events
+        public delegate void SearchWrappedHandler();
+        public event SearchWrappedHandler SearchWrapped;
+
         // There are strange things afoot at the Circle K when it comes to SelectedText
         // and NewLines as of 20160202. See here:
         // http://stackoverflow.com/questions/35138047/textbox-text-substringtextbox-selectionstart-doesnt-work-because-selectedtext
@@ -592,27 +597,28 @@ namespace org.rufwork.UI.widgets
             e.Handled = true;
         }
 
-        public async Task<bool> FindNext(string toFind, StringComparison comparisonType)
+        public async Task<bool> FindNext(string toFind, StringComparison comparisonType, bool wrapped = false)
         {
             int foundLoc = this.Text.IndexOf(toFind, this.SelectionStart2_ForText + this.SelectedText.Trim().Length, comparisonType);
             bool found = false;
+
+            $"foundLoc: {foundLoc} -- searchstring: {toFind}".LogMsg();
 
             if (foundLoc >= 0)
             {
                 this.SelectionStart = this.TextIndexToTextBoxLoc(foundLoc);
                 this.SelectionLength = toFind.Length;
+
+                //$"selectionstart: {this.SelectionStart} -- selectionlength {this.SelectionLength}".LogMsg();
+
                 found = true;
             }
-            else
+            else if (!wrapped)
             {
-                if (0 == await UWPBoxExtensions.ShowDialog(string.Format(@"No instances of ""{0}"" were found in this text starting at your selection point.
-
-Wrap to the beginning and continue?", toFind), "Text not found"))
-                {
-                    this.SelectionStart = 0;
-                    this.SelectionLength = 0;
-                    found = await this.FindNext(toFind, comparisonType);
-                }
+                SearchWrapped?.Invoke();
+                this.SelectionStart = 0;
+                this.SelectionLength = 0;
+                found = await this.FindNext(toFind, comparisonType, true);
             }
 
             return found;
@@ -1007,7 +1013,48 @@ methodically knocking people's hats off--then, I account it high time to get to
 > Cato throws himself upon his sword; I quietly
 > take to the ship.
 
-There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the ocean with me.";
+There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the ocean with me.
+
++------------------------------+----------------+------------+----------------------------+
+| Icon                         | Keystrokes     | Action     | Notes                      |
++==============================+================+============+============================+
+| ![Save As                    | Ctrl-Shift-S   | Save As    | Defaults to .md            |
+| ](http://rufwork.com/sa.png) |                |            |                            |
++------------------------------+----------------+------------+----------------------------+
+| ![Export                     | Ctrl-E         | Export     | Check your CSS Settings    |
+| ](http://rufwork.com/e.png)  |                |            | (by clicking the Settings  |
+|                                                              button) to set whether     |
+|                                                              you'd like the exported    |
+|                                                              HTML to include the CSS    |
+|                                                              used in the preview window.|
++------------------------------+----------------+------------+----------------------------+
+| ![Find                       | Ctrl-F         | Find       | Opens the Find & Replace   |
+| ](http://rufwork.com/f.png)  |                |            | dialog.                    |
+|                                                            |                            |
+|                                                            | * F3 to Find again.        |
+|                                                            | * F4 to Replace any text   |
+|                                                            |   currently found, then    |
+|                                                            |   Find again.              |
+|                                                            | * F8 to Replace the found  |
+|                                                            |   text with the replace    |
+|                                                            |   text throughout (occurs  |
+|                                                            |   immediately).            |
++------------------------------+----------------+------------+----------------------------+
+
+---
+
+###Bootstrap
+
+<style>.container > div > div{background-color:orange;border: 1px dashed;}</style>
+
++[bs]-------------------------------------------------------------+
+| Row 1 Line 1 Col 1, | Row 1 Line 1 Col 2, | Row 1 Line 1 Col 3, |
+| Row 1 Line 2 Col 1, | Row 1 Line 2 Col 2, | Row 1 Line 2 Col 3, |
+| Row 1 Line 3 Col 1  | Row 1 Line 3 Col 2  | Row 1 Line 3 Col 3  |
++-----------------------------------------------------------------+
+| Row 2, 1st of 2 cells, line 1 | Row 2, 2nd of 2 cells           |
+| Row 2, 1st of 2 cells, line 2 | Row 2, 2nd of 2 cells           |
++-----------------------------------------------------------------+";
             }
         }
         //=========================================

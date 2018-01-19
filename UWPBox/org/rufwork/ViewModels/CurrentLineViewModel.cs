@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace org.rufwork.ViewModels
 {
@@ -10,8 +6,6 @@ namespace org.rufwork.ViewModels
     {
         public string leading = "";
         public string trailing = "";
-        //public string lineEnding = "";
-        //public int lineStart = int.MinValue;
 
         public string fullLineWithoutEnding
         {
