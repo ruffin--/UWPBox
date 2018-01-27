@@ -432,6 +432,10 @@ namespace Rufwork.UI
             {
                 this.Focus(FocusState.Programmatic);
             }
+            else
+            {
+                base.OnLostFocus(e);
+            }
         }
 
         private void UWPBox_Paste(object sender, TextControlPasteEventArgs e)
