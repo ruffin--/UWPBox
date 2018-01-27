@@ -4,8 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // ======================== EO LICENSE ===============================
 
-using org.rufwork.UI.widgets;
-using org.rufwork.ViewModels;
+using Rufwork.Convenience;
+using Rufwork.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 

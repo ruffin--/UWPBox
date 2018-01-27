@@ -4,189 +4,23 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // ======================== EO LICENSE ===============================
 
+using Rufwork.Convenience;
+using Rufwork.UI.ViewModels;
 using System;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.System;
 using Windows.UI.Core;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 
-using System.Text.RegularExpressions;
-using Windows.ApplicationModel.DataTransfer;
-using Windows.UI.Popups;
-using org.rufwork.ViewModels;
-
-namespace org.rufwork.UI.widgets
+namespace Rufwork.UI
 {
-    //=========================================================================
-    #region Duped Extensions & Convenience Methods
-    //=========================================================================
-    // I have most of these in RufworkExtensions (https://github.com/ruffin--/RufworkExtensions),
-    // but I'm going to embed here (with stodgily appended underscores to method names) to make
-    // things easier to reuse.
-    public static class UWPBoxExtensions
-    {
-        public static string NormalizeNewlineToCarriageReturn_(this string str)
-        {
-            str = str.Replace("\r\n", "\r");
-            str = str.Replace("\n", "\r");
-            return str;
-        }
-
-        // For some reason, the PCL wasn't supporting TakeWhile, so I skipped on this LINQ heavy solution:
-        // string toPrepend = string.Concat(value.TakeWhile(c => c.Equals(' '))); // ...
-        public static Tuple<string, string> PullLeadingAndTrailingSpaces_(this string value)
-        {
-            // I don't normally return like this. Sorry.
-            if (string.IsNullOrEmpty(value))
-                return new Tuple<string, string>(string.Empty, string.Empty);
-
-            if (string.IsNullOrWhiteSpace(value))
-                return new Tuple<string, string>(value, string.Empty);
-
-            int prependCount = 0;
-            int appendCount = 0;
-
-            int i = 0;
-            while (value[i++].Equals(' '))
-                prependCount++;
-
-            i = value.Length - 1;
-            while (value[i--].Equals(' '))
-                appendCount++;
-
-            return new Tuple<string, string>(new string(' ', prependCount), new string(' ', appendCount));
-        }
-
-        // Note that this doesn't work with Hebrew characters with vowels,
-        // apparently (though you could argue it kind of does, iiuc)
-        // See stackoverflow.com/questions/15029238
-        public static string ReverseString_(this string str)
-        {
-            if (null == str)
-                return null;
-
-            char[] aReverseMe = str.ToCharArray();
-            Array.Reverse(aReverseMe);
-            return new string(aReverseMe);
-        }
-
-        public static string Slice_(this string str, int intSlice)
-        {
-            string ret = str;
-
-            if (0 == intSlice)
-            {
-                ret = str;
-            }
-            else if (intSlice > 0)
-            {
-                ret = str.Substring(0, intSlice);
-            }
-            else
-            {
-                // Remember that intSlice is negative here
-                ret = str.Remove(str.Length + intSlice);
-            }
-            return ret;
-        }
-
-        public static void LogMsg(this string strMsg)
-        {
-            System.Diagnostics.Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ": " + strMsg);
-        }
-
-        public static async Task<int> ShowDialog(string strMsg, string strTitle = "", bool bShowCancel = true)
-        {
-            var dialog = new MessageDialog(strMsg);
-            if (!string.IsNullOrWhiteSpace(strTitle))
-            {
-                dialog.Title = strTitle;
-            }
-
-            dialog.Commands.Add(new UICommand { Label = "Ok", Id = 0 });
-            if (bShowCancel)
-                dialog.Commands.Add(new UICommand { Label = "Cancel", Id = 1 });
-
-            var res = await dialog.ShowAsync();
-            return (int)res.Id;
-        }
-
-        /// <summary>
-        /// Will return a Microsoft formatted HTML snippet if the clipboard contains it, otherwise
-        /// plain text.
-        ///
-        /// Passing returnFragmentOnly as false, the default, will return "full" clipboard contents
-        /// in "raw" format:
-        /// See: https://msdn.microsoft.com/en-us/library/windows/desktop/ms649015(v=vs.85).aspx
-        ///
-        /// You may also want to see this convenience wrapper that parses html fragments into view models:
-        /// https://github.com/ruffin--/HtmlFragmentHelper
-        ///
-        /// Passing returnHtmlClipboardRaw as true will only return the HTML code from the selected fragment
-        /// without any clipboard metadata or HTML header information. See `returnFragmentOnly` comments
-        /// for more details.
-        ///
-        /// If clipboard isn't in HTML format, this will attempt to return the clipboard's contents as text.
-        /// </summary>
-        /// <param name="returnFragmentOnly">If false, the clipboard will be returned as a  full
-        /// Microsoft html fragment be returned. True will return only the html fragment between
-        /// "&lt;!--StartFragment-->" and &lt;!--EndFragment--> tags without metadata or any html
-        /// outside of those two tags.</param>
-        /// <returns>Returns ONE of
-        /// 1.) Full html Microsoft clipboard as text,
-        /// 2.) The html fragment of the clipboard as text, or
-        /// 3.) Non-html format clipboard contents as plain text.</returns>
-        public static async Task<string> ClipboardAsHtml(bool returnFragmentOnly = false)
-        {
-            string ret = string.Empty;
-            DataPackageView dataPackageView = Clipboard.GetContent();
-
-            if (dataPackageView.Contains(StandardDataFormats.Html))
-            {
-                ret = await Clipboard.GetContent().GetHtmlFormatAsync();
-
-                if (returnFragmentOnly)
-                {
-                    string delimiterStartAfter = "<!--StartFragment-->";
-                    string delimiterEndBefore = "<!--EndFragment-->";
-
-                    if (-1 < ret.IndexOf(delimiterStartAfter))
-                    {
-                        ret = ret.Substring(ret.IndexOf(delimiterStartAfter) + delimiterStartAfter.Length);
-                        if (-1 < ret.IndexOf(delimiterEndBefore))
-                        {
-                            ret = ret.Substring(0, ret.IndexOf(delimiterEndBefore));
-                        }
-                        else
-                        {
-                            ret = string.Empty;  // No luck, Ending not after Start; go back to nothing.
-                        }
-                    }
-                }
-            }
-            else if (dataPackageView.Contains(StandardDataFormats.Text))
-            {
-                ret = await Clipboard.GetContent().GetTextAsync();
-            }
-
-            return ret;
-        }
-
-        public static async Task<string> ClipboardAsText()
-        {
-            return await Clipboard.GetContent().GetTextAsync();
-        }
-    }
-    //=========================================================================
-    #endregion Duped Extensions & Convenience Methods
-    //=========================================================================
-
-
     public class UWPBox : TextBox
     {
         public static string Tab = "    ";
@@ -204,6 +38,26 @@ namespace org.rufwork.UI.widgets
         // selection, we actually have some time to do these string manipulations in live time.
         // That is, this isn't happening 1000s of times on a background thread...
 
+        public UWPBox() : base()
+        {
+            this.Name = "UWPBox: " + DateTime.Now.ToString("hh:mm ss");
+            this.FontFamily = new FontFamily("Consolas");
+            //this.AcceptsTab = true;   // <<< Does not exist in UWPland.
+            this.AcceptsReturn = true;
+            this.TextWrapping = TextWrapping.Wrap;
+
+            //this.MobyWrapped();
+            //this.BulletText();
+
+            ScrollViewer.SetVerticalScrollBarVisibility(this, ScrollBarVisibility.Auto);
+            ScrollViewer.SetHorizontalScrollBarVisibility(this, ScrollBarVisibility.Auto);
+
+            // We've got some wacky TextBox behaviors to normalize on KeyDown,
+            // the Control-I behavior, and the Tab-selects-a-new-control behavior.
+            this.KeyDown += this.KeyDownHandler;
+            this.KeyUp += this.KeyUpHandler;
+            this.Paste += UWPBox_Paste;
+        }
 
         //=======================================
         #region UWP TextBox kludges
@@ -416,20 +270,35 @@ namespace org.rufwork.UI.widgets
         //=============================================
         #region methods that could live anywhere
         //=============================================
-        public async Task<int> ShowErrorDialog(Exception e, string strLocation)
+
+        // Dialog Wrapper
+        public static async Task<int> ShowDialog(string strMsg, string strTitle = "", bool bShowCancel = true)
         {
-            var dialog = new MessageDialog("An error occurred in a textbox:\n\n" + e.Message + "\n\n" + strLocation);
+            var dialog = new MessageDialog(strMsg);
+            if (!string.IsNullOrWhiteSpace(strTitle))
+            {
+                dialog.Title = strTitle;
+            }
+
+            dialog.Commands.Add(new UICommand { Label = "Ok", Id = 0 });
+            if (bShowCancel)
+                dialog.Commands.Add(new UICommand { Label = "Cancel", Id = 1 });
+
+            var res = await dialog.ShowAsync();
+            return (int)res.Id;
+        }
+        public async void ShowErrorDialog(Exception e, string strLocation)
+        {
+            var errMsg = "An error occurred in a textbox:\n\n" + e.Message + "\n\n" + strLocation;
+            errMsg.LogMsg();
+            var dialog = new MessageDialog(errMsg);
             dialog.Title = "Issue Tracker for UWPBox";
             dialog.Commands.Add(new UICommand { Label = "Ok", Id = 0 });
             var res = await dialog.ShowAsync();
 
-            if ((int)res.Id == 0)
-            {
-                ("Selected id: " + res.Id).LogMsg();
-            }
-
-            return (int)res.Id;
         }
+        // EO Dialog Wrapper
+
 
         public CurrentLineViewModel GetCurrentLine(int intNumLinesPreviousToCurrent = 0, string strContents = null)
         {
@@ -555,27 +424,6 @@ namespace org.rufwork.UI.widgets
         //=============================================
 
 
-        public UWPBox() : base()
-        {
-            this.Name = "UWPBox: " + DateTime.Now.ToString("hh:mm ss");
-            this.FontFamily = new FontFamily("Consolas");
-            //this.AcceptsTab = true;   // <<< Does not exist in UWPland.
-            this.AcceptsReturn = true;
-            this.TextWrapping = TextWrapping.Wrap;
-
-            //this.MobyWrapped();
-            //this.BulletText();
-
-            ScrollViewer.SetVerticalScrollBarVisibility(this, ScrollBarVisibility.Auto);
-            ScrollViewer.SetHorizontalScrollBarVisibility(this, ScrollBarVisibility.Auto);
-
-            // We've got some wacky TextBox behaviors to normalize on KeyDown,
-            // the Control-I behavior, and the Tab-selects-a-new-control behavior.
-            this.KeyDown += this.KeyDownHandler;
-            this.KeyUp += this.KeyUpHandler;
-            this.Paste += UWPBox_Paste;
-        }
-
         protected override void OnLostFocus(RoutedEventArgs e)
         {
             bool isUpArroPressed = Window.Current.CoreWindow.GetKeyState(VirtualKey.Up).HasFlag(CoreVirtualKeyStates.Down);
@@ -627,7 +475,7 @@ namespace org.rufwork.UI.widgets
         //====================================================
         #region KeyDown related
         //====================================================
-        public virtual async void KeyDownHandler(object sender, KeyRoutedEventArgs e)
+        public virtual void KeyDownHandler(object sender, KeyRoutedEventArgs e)
         {
             bool isCtrlDown = Window.Current.CoreWindow.GetKeyState(VirtualKey.Control).HasFlag(CoreVirtualKeyStates.Down);
             bool isShiftDown = Window.Current.CoreWindow.GetKeyState(VirtualKey.Shift).HasFlag(CoreVirtualKeyStates.Down);
@@ -668,7 +516,7 @@ namespace org.rufwork.UI.widgets
             }
             catch (Exception ex)
             {
-                await this.ShowErrorDialog(ex, "UWPBox.KeyDownHandler");
+                this.ShowErrorDialog(ex, "UWPBox.KeyDownHandler");
             }
         }
 
@@ -677,7 +525,7 @@ namespace org.rufwork.UI.widgets
             this.BaseHandleKeyDown(sender, e, isCtrlDown, isShiftDown, isAltDown);
         }
 
-        public async void BaseHandleKeyDown(object sender, KeyRoutedEventArgs e, bool isCtrlDown, bool isShiftDown, bool isAltDown)
+        public void BaseHandleKeyDown(object sender, KeyRoutedEventArgs e, bool isCtrlDown, bool isShiftDown, bool isAltDown)
         {
             try
             {
@@ -698,17 +546,17 @@ namespace org.rufwork.UI.widgets
             }
             catch (Exception ex)
             {
-                await this.ShowErrorDialog(ex, "Key down handler, textbox");
+                this.ShowErrorDialog(ex, "Key down handler, textbox");
             }
         }
 
-        public async virtual void HandlePaste(bool isCtrlDown, bool isShiftDown, bool isAltDown)
+        public virtual async void HandlePaste(bool isCtrlDown, bool isShiftDown, bool isAltDown)
         {
             if (isCtrlDown)
             {
                 try
                 {
-                    string strClipboard = await UWPBoxExtensions.ClipboardAsText();
+                    string strClipboard = await ClipboardConvenience.ClipboardAsText();
                     this.SelectedText = strClipboard;   // TODO: Be more careful about things that don't have text.
 
                     this.SelectionStart += this.SelectionLength;
@@ -716,7 +564,7 @@ namespace org.rufwork.UI.widgets
                 }
                 catch (Exception exPaste)
                 {
-                    await this.ShowErrorDialog(exPaste, "Your clipboard does not appear to contain pasteable text.");
+                    this.ShowErrorDialog(exPaste, "Your clipboard does not appear to contain pasteable text.");
                 }
             }
         }
@@ -840,7 +688,7 @@ namespace org.rufwork.UI.widgets
                 // and pull back to the prior safe character. If it's the start of the text,
                 // we can keep the whole thing.
                 if (ac0D0A.Contains(c)) intStringOffset--;
-                UWPBoxExtensions.LogMsg("#" + strExtra + "#");
+                ("#" + strExtra + "#").LogMsg();
 
                 this.SelectionStart -= intStringOffset;
                 this.SelectionLength += intStringOffset;
@@ -869,7 +717,7 @@ namespace org.rufwork.UI.widgets
         //====================================================
         #region KeyUp related
         //====================================================
-        private async void KeyUpHandler(object sender, KeyRoutedEventArgs e)
+        private void KeyUpHandler(object sender, KeyRoutedEventArgs e)
         {
             try
             {
@@ -882,7 +730,7 @@ namespace org.rufwork.UI.widgets
             }
             catch (Exception ex)
             {
-                await this.ShowErrorDialog(ex, "Textbox keyuphandler");
+                this.ShowErrorDialog(ex, "Textbox keyuphandler");
             }
         }
 
@@ -893,7 +741,7 @@ namespace org.rufwork.UI.widgets
 
         public void BaseHandleKeyUp(object sender, KeyRoutedEventArgs e, bool isCtrlDown, bool isShiftDown, bool isAltDown)
         {
-            UWPBoxExtensions.LogMsg("BaseHandleKeyUp without override");
+            "BaseHandleKeyUp without override".LogMsg();
         }
         //====================================================
         #endregion KeyUp related
@@ -977,7 +825,7 @@ namespace org.rufwork.UI.widgets
 
         public async void MobyWrapped()
         {
-            int result = await UWPBoxExtensions.ShowDialog("Erase what's in this window and replace with testing Markdown? Really?", "Pick Cancel");
+            int result = await UWPBox.ShowDialog("Erase what's in this window and replace with testing Markdown? Really?", "Pick Cancel");
 
             if (result.Equals(0))
             {

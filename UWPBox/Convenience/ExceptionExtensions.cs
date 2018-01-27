@@ -4,18 +4,21 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // ======================== EO LICENSE ===============================
 
-namespace Rufwork.UI.ViewModels
-{
-    public class CurrentLineViewModel
-    {
-        public string leading = "";
-        public string trailing = "";
+using System;
 
-        public string fullLineWithoutEnding
+namespace Rufwork.Convenience
+{
+    public static class ExceptionExtensions
+    {
+        public static string Log_(this Exception e, string strLocation, string strAddlInfo = "")
         {
-            get {
-                return leading + trailing;
-            }
+            string ret = $@"{strLocation} #{e.Message}#
+    Trace: {e.StackTrace}
+    {strAddlInfo}";
+
+            ret.LogMsg();
+
+            return ret;
         }
     }
 }
