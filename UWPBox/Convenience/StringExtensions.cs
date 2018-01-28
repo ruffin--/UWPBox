@@ -27,6 +27,7 @@ namespace Rufwork.Convenience
 
         // For some reason, the PCL wasn't supporting TakeWhile, so I skipped on this LINQ heavy solution:
         // string toPrepend = string.Concat(value.TakeWhile(c => c.Equals(' '))); // ...
+        // Update: Because TakeWhile is on IEnumerable, and you need to ToCharArray on the string first. (>.<)
         public static Tuple<string, string> PullLeadingAndTrailingSpaces_(this string value)
         {
             // I don't normally return like this. Sorry.

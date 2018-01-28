@@ -440,7 +440,7 @@ namespace Rufwork.UI
 
         private void UWPBox_Paste(object sender, TextControlPasteEventArgs e)
         {
-            "Native paste action ignored and transferred to KeyUp".LogMsg();
+            //"Native paste action ignored and transferred to KeyUp".LogMsg();
 
             // This isn't accessible from here, so we're going to have to rip out all pastes,
             // and then reimplement in KeyUp for V.
@@ -454,7 +454,7 @@ namespace Rufwork.UI
             int foundLoc = this.Text.IndexOf(toFind, this.SelectionStart2_ForText + this.SelectedText.Trim().Length, comparisonType);
             bool found = false;
 
-            $"foundLoc: {foundLoc} -- searchstring: {toFind}".LogMsg();
+            //$"foundLoc: {foundLoc} -- searchstring: {toFind}".LogMsg();
 
             if (foundLoc >= 0)
             {
@@ -535,7 +535,7 @@ namespace Rufwork.UI
             {
                 if (isCtrlDown && e.OriginalKey != VirtualKey.Control)
                 {
-                    ("KeyDown from UWPBox BaseHandleKeys: " + e.OriginalKey.ToString()).LogMsg();
+                    ("KeyDown with control from UWPBox BaseHandleKeys (HandleKeyDown not overridden): " + e.OriginalKey.ToString()).LogMsg();
                 }
 
                 switch (e.OriginalKey)
@@ -745,7 +745,7 @@ namespace Rufwork.UI
 
         public void BaseHandleKeyUp(object sender, KeyRoutedEventArgs e, bool isCtrlDown, bool isShiftDown, bool isAltDown)
         {
-            "BaseHandleKeyUp without override".LogMsg();
+            //"BaseHandleKeyUp/HandleKeyUp not overridden override".LogMsg();
         }
         //====================================================
         #endregion KeyUp related
