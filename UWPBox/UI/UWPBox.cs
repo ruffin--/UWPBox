@@ -449,11 +449,17 @@ namespace Rufwork.UI
             e.Handled = true;
         }
 
+
         public async Task<bool> FindNext(string toFind, StringComparison comparisonType, bool wrapped = false)
         {
-            int foundLoc = this.Text.IndexOf(toFind, this.SelectionStart2_ForText + this.SelectedText.Trim().Length, comparisonType);
-            bool found = false;
+            var foundLoc = await this.FoundNextLoc(toFind, comparisonType, wrapped);
 
+            return foundLoc > -1;
+        }
+
+        public async Task<int> FoundNextLoc(string toFind, StringComparison comparisonType, bool wrapped = false)
+        {
+            int foundLoc = this.Text.IndexOf(toFind, this.SelectionStart2_ForText + this.SelectedText.Length, comparisonType);
             //$"foundLoc: {foundLoc} -- searchstring: {toFind}".LogMsg();
 
             if (foundLoc >= 0)
@@ -462,18 +468,30 @@ namespace Rufwork.UI
                 this.SelectionLength = toFind.Length;
 
                 //$"selectionstart: {this.SelectionStart} -- selectionlength {this.SelectionLength}".LogMsg();
-
-                found = true;
             }
             else if (!wrapped)
             {
                 SearchWrapped?.Invoke();
+
+                var selectionStart = this.SelectionStart;
+                var selectionLength = this.SelectionLength;
+
                 this.SelectionStart = 0;
                 this.SelectionLength = 0;
-                found = await this.FindNext(toFind, comparisonType, true);
+
+                foundLoc = await this.FoundNextLoc(toFind, comparisonType, true);
+
+                // Just as convenience, put the selection back if the term's not found.
+                // Otherwise we lose our selection and cursor loc and have the cursor at 0
+                // after the failed wrapping search concludes.
+                if (foundLoc.Equals(-1))
+                {
+                    this.SelectionStart = selectionStart;
+                    this.SelectionLength = selectionLength;
+                }
             }
 
-            return found;
+            return foundLoc;
         }
 
         //====================================================
