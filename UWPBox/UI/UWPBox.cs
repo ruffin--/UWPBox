@@ -465,7 +465,7 @@ namespace Rufwork.UI
             if (foundLoc >= 0)
             {
                 this.SelectionStart = this.TextIndexToTextBoxLoc(foundLoc);
-                this.SelectionLength = toFind.Length;
+                this.SelectionLength = toFind.NormalizeNewlineToCarriageReturn_().Length;
 
                 //$"selectionstart: {this.SelectionStart} -- selectionlength {this.SelectionLength}".LogMsg();
             }
