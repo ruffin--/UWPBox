@@ -5,18 +5,14 @@
 // ======================== EO LICENSE ===============================
 
 using System;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Rufwork.Convenience
 {
     // I have most of these in RufworkExtensions (https://github.com/ruffin--/RufworkExtensions),
     // but I'm going to embed here (with stodgily appended underscores to method names) to make
     // this package easier to reuse.
-    public static class StringExtensions
+    internal static class StringExtensions
     {
-        private static Regex _regexStartDigitsPeriod = new Regex(@"^\d+\. ");
-        private static Regex _regexNoContentOL = new Regex(@"^\s*[0-9]+\. $");
 
         public static string NormalizeNewlineToCarriageReturn_(this string str)
         {
@@ -84,27 +80,6 @@ namespace Rufwork.Convenience
             return ret;
         }
 
-        public static QuackResult QuacksLikeOrderedList_(this string fullLineWithoutEnding, int tabLengthInSpaces)
-        {
-
-            QuackResult result = new QuackResult();
-            var match = _regexStartDigitsPeriod.Match(fullLineWithoutEnding.TrimStart());
-
-            int spaceCount = fullLineWithoutEnding.TakeWhile(c => c.Equals(' ')).Count();
-            result.QuacksLikeAnOL = 0 == spaceCount % tabLengthInSpaces
-                && match.Success;
-
-            if (match.Success)
-            {
-                result.HasContent = !_regexNoContentOL.IsMatch(fullLineWithoutEnding);
-                result.ListOrdinal = int.Parse(match.Value.Trim().Trim('.'));
-                result.MatchLength = match.Length;
-                result.MatchStart = match.Index + spaceCount;
-            }
-
-            return result;
-        }
-
         public static bool CouldBeUrl_(this string str)
         {
             //return str.StartsWith("http") && str.Contains("://");
@@ -125,25 +100,6 @@ namespace Rufwork.Convenience
         public static void LogMsg(this string strMsg)
         {
             System.Diagnostics.Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ": " + strMsg);
-        }
-
-    }
-
-    public class QuackResult
-    {
-        public bool QuacksLikeAnOL = false;
-        public bool HasContent = false;
-        public int ListOrdinal = -1;
-        public int MatchLength = -1;
-        public int MatchStart = -1;
-
-        public override string ToString()
-        {
-            return "Quacks? " + this.QuacksLikeAnOL
-                + " :: HasContent? " + this.HasContent
-                + " :: ListOrdinal: " + this.ListOrdinal
-                + " :: MatchLength: " + this.MatchLength
-                + " :: MatchStart: " + this.MatchStart;
         }
     }
 }
