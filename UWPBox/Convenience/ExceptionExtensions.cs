@@ -8,7 +8,7 @@ using System;
 
 namespace Rufwork.Convenience
 {
-    public static class ExceptionExtensions
+    internal static class ExceptionExtensions
     {
         public static string Log_(this Exception e, string strLocation, string strAddlInfo = "")
         {
