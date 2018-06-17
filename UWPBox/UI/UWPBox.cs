@@ -398,18 +398,33 @@ namespace Rufwork.UI
 
             while (bContinue)
             {
+                int beforeLength = this.SelectedText.Length;
                 this.SelectionLength++;
-                int selectedTextLength = this.SelectedText.Length;
                 string cachedSelection = this.SelectedText;
-                char c = cachedSelection[cachedSelection.Length - 1];
 
-                if (this.SelectionLength.Equals(cachedSelection.Length)
-                    && ac0D0A.Contains(c))
+                // We increased the selection, so the selection length
+                // should be longer. If that's the case, continue.
+                //
+                // If beforeLength is the same as after we increase the
+                // selection, then we should be at the end of the string.
+                // Stop looking for line endings.
+                // If beforeLength is GREATER, then all bets are off. ;^)
+                // But quit looking then too.
+                if (beforeLength < cachedSelection.Length)
                 {
-                    trailing0D0As += c;
-                }
-                else
-                {
+                    char c = cachedSelection[cachedSelection.Length - 1]; // BAM
+
+                    if (this.SelectionLength.Equals(cachedSelection.Length)
+                        && ac0D0A.Contains(c))
+                    {
+                        trailing0D0As += c;
+                    }
+                    else
+                    {
+                        bContinue = false;
+                    }
+                } else {
+                    // If this selection didn't grow, we're probably at the end of the text. No more 0D0As.
                     bContinue = false;
                 }
             }
