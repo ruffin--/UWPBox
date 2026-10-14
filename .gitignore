@@ -2,3 +2,5 @@ BulletTest/obj/
 BulletTest/bin/
 UWPBox/obj/
 UWPBox/bin/
+*.swp
+UWPBox/Backup/
