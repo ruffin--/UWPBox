@@ -11,7 +11,7 @@ namespace Rufwork.Convenience
     // I have most of these in RufworkExtensions (https://github.com/ruffin--/RufworkExtensions),
     // but I'm going to embed here (with stodgily appended underscores to method names) to make
     // this package easier to reuse.
-    internal static class StringExtensions
+    internal static class DupedStringExtensions
     {
 
         public static string NormalizeNewlineToCarriageReturn_(this string str)
